@@ -38,14 +38,10 @@ body {
 }
 .message { 
   margin-bottom: 10px; 
-  transition: background 0.5s;
 }
 .message span { 
   font-weight: bold; 
   margin-right: 5px; 
-}
-.new-message{
-  background: #fffa8b;
 }
 #send-container {
   display: flex;
@@ -78,9 +74,8 @@ body {
 <div id="chat-container">
   <div id="instructions">
     Enter your name, email, message, and recipient (Global or Name) then hit Send.<br>
-    Messages appear automatically 
-    <br> <br>
-    © 2026 Krishna. All rights reserved. All code and design on this site are proprietary. Unauthorized copying or use is prohibited.
+    Messages appear automatically.<br><br>
+    © 2026 Krishna. All rights reserved. All code and design are proprietary.
   </div>
   <div id="messages"></div>
   <div id="send-container">
@@ -93,10 +88,11 @@ body {
 </div>
 
 <script>
+// NEW Sheet & Form URLs
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1gTcwIl1KAzuRDgsX2f4gYzZGI_lihoqTAaQ2EDylu6k/gviz/tq?tqx=out:csv";
 const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeOOwSB0DV1ErKikvn08IQ5-0qgurXvBjOJTakdLhndbZjfbw/formResponse";
 
-// Entry IDs from your new form
+// NEW Entry IDs
 const NAME_ENTRY_ID = "entry.727031839";
 const EMAIL_ENTRY_ID = "entry.611414622";
 const MESSAGE_ENTRY_ID = "entry.1492853225";
@@ -111,18 +107,18 @@ const sendBtn = document.getElementById('send-btn');
 
 let messages = [];
 
-// CSV-safe parser to handle commas
 function parseCSVRow(row){
   const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
   return row.split(regex).map(col => col.replace(/^"|"$/g, '').trim());
 }
 
-// Fetch messages
+let autoScrolledOnce = false;
+
 async function fetchMessages(){
   try {
     const res = await fetch(SHEET_CSV_URL);
     const text = await res.text();
-    const rows = text.split("\n").slice(1); // skip header
+    const rows = text.split("\n").slice(1);
 
     const allMessages = rows.map(row => {
       if(!row.trim()) return null;
@@ -139,11 +135,17 @@ async function fetchMessages(){
     messagesDiv.innerHTML = "";
     allMessages.forEach(m => renderMessage(m));
     messages = allMessages;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  } catch(e){console.warn("Fetch failed", e);}
+
+    if (!autoScrolledOnce) {
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      autoScrolledOnce = true;
+    }
+
+  } catch(e){
+    console.warn("Fetch failed", e);
+  }
 }
 
-// Render single message
 function renderMessage(m){
   const sender = m.name.trim() ? m.name : (m.email || "Anonymous");
   const div = document.createElement('div');
@@ -152,10 +154,8 @@ function renderMessage(m){
   messagesDiv.appendChild(div);
 }
 
-// Poll every 3 seconds
 setInterval(fetchMessages, 3000);
 
-// Send message
 sendBtn.addEventListener('click', ()=>{
   const name = nameInput.value.trim();
   const email = emailInput.value.trim();
@@ -181,7 +181,6 @@ sendBtn.addEventListener('click', ()=>{
   recipientInput.value = "";
 });
 
-// Initial load
 fetchMessages();
 </script>
   <!-- minibanner -->
